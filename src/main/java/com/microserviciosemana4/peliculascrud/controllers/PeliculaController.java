@@ -30,7 +30,8 @@ public class PeliculaController {
     }
     @PostMapping
     public Pelicula insertaPelicula(@RequestBody Pelicula pelicula) {
-        return peliculaService.insertaPelicula(pelicula); 
+        Pelicula peliculaGuardada = peliculaService.insertaPelicula(pelicula);
+        return peliculaGuardada;
     }
     @PutMapping("/{id}")
     public Pelicula actualizaPelicula(@RequestBody Pelicula pelicula, @PathVariable int id) {
