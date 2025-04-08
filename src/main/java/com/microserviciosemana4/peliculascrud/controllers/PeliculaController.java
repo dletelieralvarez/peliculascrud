@@ -3,6 +3,7 @@ import com.microserviciosemana4.peliculascrud.model.Pelicula;
 import com.microserviciosemana4.peliculascrud.services.PeliculaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,17 +30,36 @@ public class PeliculaController {
         return pelicula.orElse(null); 
     }
     @PostMapping
-    public Pelicula insertaPelicula(@RequestBody Pelicula pelicula) {
-        Pelicula peliculaGuardada = peliculaService.insertaPelicula(pelicula);
-        return peliculaGuardada;
+    public ResponseEntity<String> insertaPelicula(@RequestBody Pelicula pelicula) {
+       try
+       {
+            peliculaService.insertaPelicula(pelicula);
+            return ResponseEntity.ok("Pelicula insertada con exito"); 
+       }
+       catch (Exception e){    
+        return ResponseEntity.status(500).body("Error al insertar la pelicula: " + e.getMessage()); 
+       }
     }
     @PutMapping("/{id}")
-    public Pelicula actualizaPelicula(@RequestBody Pelicula pelicula, @PathVariable int id) {
-        return peliculaService.actualizaPelicula(pelicula, id); 
+    public ResponseEntity<String> actualizaPelicula(@RequestBody Pelicula pelicula, @PathVariable int id) {
+        try
+        {
+            peliculaService.actualizaPelicula(pelicula, id);
+            return ResponseEntity.ok("Pelicula Actualizada con exito ID : " + id); 
+        }
+        catch (Exception e){    
+            return ResponseEntity.status(500).body("Error al actualizar la pelicula: " + e.getMessage()); 
+        }
     }
     @DeleteMapping("/{id}")
-    public Pelicula eliminaPelicula(@PathVariable int id) {
-        return peliculaService.eliminaPelicula(id); 
+    public ResponseEntity<String> eliminaPelicula(@PathVariable int id) {
+        try{
+            peliculaService.eliminaPelicula(id); 
+            return ResponseEntity.ok("Pelicula eliminada con exito ID : " + id);    
+        }
+        catch (Exception e){    
+            return ResponseEntity.status(500).body("Error al eliminar la pelicula: " + e.getMessage()); 
+        }   
     }
 
     
