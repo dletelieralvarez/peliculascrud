@@ -1,4 +1,4 @@
-package com.microserviciosemana4.peliculascrud;
+package com.microserviciosemana5.peliculascruds5;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

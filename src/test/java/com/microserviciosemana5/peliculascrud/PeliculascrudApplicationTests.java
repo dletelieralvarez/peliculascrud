@@ -1,4 +1,4 @@
-package com.microserviciosemana4.peliculascrud;
+package com.microserviciosemana5.peliculascrud;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,8 +1,8 @@
-package com.microserviciosemana4.peliculascrud.services;
+package com.microserviciosemana5.peliculascruds5.services;
 import org.springframework.stereotype.Service;
 
-import com.microserviciosemana4.peliculascrud.model.Pelicula;
-import com.microserviciosemana4.peliculascrud.repository.peliculaRepository;
+import com.microserviciosemana5.peliculascruds5.model.Pelicula;
+import com.microserviciosemana5.peliculascruds5.repository.peliculaRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +27,9 @@ public class PeliculaServiceImpl implements PeliculaService {
     }
     @Override
     public Pelicula insertaPelicula(Pelicula pelicula) {
+       if (peliculaRepository.existsById(pelicula.getID())) {
+            throw new IllegalArgumentException("La pelicula ya existe con el ID: " + pelicula.getID());
+        }
         return peliculaRepository.save(pelicula);
     }
     @Override   
