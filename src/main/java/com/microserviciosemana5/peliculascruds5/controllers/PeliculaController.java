@@ -11,11 +11,12 @@ import com.microserviciosemana5.peliculascruds5.services.PeliculaService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/peliculas")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 
 public class PeliculaController {
 
@@ -25,9 +26,11 @@ public class PeliculaController {
     @GetMapping
     public ResponseEntity<ApiResult<List<Pelicula>>> retornaTodasLasPeliculas() {
         try {
+            log.info("Get / retornaTodasLasPeliculas - Se obtiene la lista de todas las películas");
             List<Pelicula> peliculas = peliculaService.getTodasLasPeliculas();
             //si la lista esta en blanco, mostrará el mensaje 
             if (peliculas.isEmpty()) {
+                log.warn("No se encontraron películas en la base de datos");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ApiResult<>("No se encontraron películas", null, HttpStatus.NOT_FOUND.value()));
             }
@@ -45,13 +48,29 @@ public class PeliculaController {
     //}
 
     @GetMapping("/{id}")
-    public Pelicula retornaPeliculaPorID(@PathVariable int id) {
-        Optional<Pelicula> pelicula = peliculaService.getPeliculaPorID(id); 
-        return pelicula.orElse(null); 
+    public ResponseEntity<ApiResult<Pelicula>> retornaPeliculaPorID(@PathVariable int id) {
+        try{      
+            log.info("Get / retornaPeliculaPorID - Se obtiene el Pelicula con id: " + id);      
+            Optional<Pelicula> pelicula = peliculaService.getPeliculaPorID(id); 
+            if(pelicula.isPresent()){
+                log.info("Pelicula encontrado con id: " + id);
+                return ResponseEntity.ok(new ApiResult<>("Pelicula encontrada", pelicula.get(), HttpStatus.OK.value()));                  
+            }
+            else{  
+                log.warn("No se encontro Pelicula con id: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResult<>("Pelicula no encontrada con id: " + id, null, HttpStatus.NOT_FOUND.value()));
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResult<>("Error al obtener Pelicula con id : " + id, null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
     }
     @PostMapping
     public ResponseEntity<ApiResult<?>> insertaPelicula(@Valid @RequestBody Pelicula pelicula) {
         try {
+            log.info("Post / insertaPelicula - Se crea una nueva película: " + pelicula.toString());
             Pelicula nueva = peliculaService.insertaPelicula(pelicula);
     
             ApiResult<List<Pelicula>> respuesta = new ApiResult<>(
@@ -75,9 +94,11 @@ public class PeliculaController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResult<List<Pelicula>>> actualizaPelicula(@PathVariable int id, @Valid @RequestBody Pelicula pelicula) {
         try {
+            log.info("Put / actualizaPelicula - Se actualiza Pelicula con id: " + id);
             Optional<Pelicula> buscaPelicula = peliculaService.getPeliculaPorID(id);
     
             if(!buscaPelicula.isPresent()) {
+                log.warn("No se encontro Pelicula con id: " + id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResult<>("Película no encontrada", null, HttpStatus.NOT_FOUND.value()));
             }
@@ -91,6 +112,7 @@ public class PeliculaController {
             actualiza.setGENERO(pelicula.getGENERO());            
             actualiza.setSINOPSIS(pelicula.getSINOPSIS());
             //guardar la modificacion
+            log.info("Pelicula actualizada con id: " + id);
             Pelicula peliculaActualizada = peliculaService.actualizaPelicula(actualiza, id);
             //retorno el resultado con apiresult
             return ResponseEntity.status(HttpStatus.OK)
@@ -98,6 +120,7 @@ public class PeliculaController {
         
         } catch (Exception e) {
             // En caso de error 
+            log.error("Error al actualizar Pelicula con id: " + id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ApiResult<>("Error al actualizar la película", null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
@@ -116,15 +139,17 @@ public class PeliculaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResult<String>> eliminaPelicula(@PathVariable int id) {
         try{
-
+            log.info("Delete / eliminaPelicula - Se elimina Pelicula con id: " + id);
             //retorna los datos de la pelicula segun el id
             Optional<Pelicula> peliculaExistente = peliculaService.getPeliculaPorID(id);
             //si no la encuentra entra en el if y devuelve el mensaje
             if(!peliculaExistente.isPresent()) {
+                log.warn("No se encontro Pelicula con id: " + id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResult<>("Pelicula no encontrada", null, HttpStatus.NOT_FOUND.value()));
             }
             //si la encuentra la elimina y retorna el mensaje de exito
+            log.info("Pelicula encontrada con id: " + id);
             peliculaService.eliminaPelicula(id);
             return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResult<>("Película eliminada con éxito", "ID eliminado: " + id, HttpStatus.OK.value()));
