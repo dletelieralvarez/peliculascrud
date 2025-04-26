@@ -22,7 +22,7 @@ public class PeliculaController {
 
     @Autowired
     private PeliculaService peliculaService;
-
+    
     @GetMapping
     public ResponseEntity<ApiResult<List<Pelicula>>> retornaTodasLasPeliculas() {
         try {
