@@ -29,37 +29,37 @@ public class Pelicula
     @Id //indica que es la llave primaria    
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID") //nombre de la columna en la base de datos
-    @JsonProperty("ID") //nombre del atributo en el json
+    @JsonProperty("id") //nombre del atributo en el json
     private int ID;
 
     @NotBlank(message = "El título no puede estar vacío")
     @Size(min = 1, max = 200, message = "El título debe tener entre 1 y 200 caracteres")
     @Column(name = "TITULO") //nombre de la columna en la base de datos
-    @JsonProperty("TITULO")
+    @JsonProperty("titulo")
     private String TITULO;
     
     @Min(value = 1990, message = "El año debe ser mayor o igual a 1900")
     @Max(value = 2025, message = "El año debe ser menor o igual a 2025")
     @Column(name = "ANIO") //nombre de la columna en la base de datos
-    @JsonProperty("ANIO")
+    @JsonProperty("anio")
     private int ANIO;   
 
     @NotBlank(message = "Director no puede estar vacío")
     @Size(min = 1, max = 200, message = "El director debe tener entre 1 y 200 caracteres")
     @Column(name = "DIRECTOR") //nombre de la columna en la base de datos
-    @JsonProperty("DIRECTOR")
+    @JsonProperty("director")
     private String DIRECTOR;
     
     @NotBlank(message = "El género no puede estar vacío")
     @Size(min = 1, max = 300, message = "El género debe tener entre 1 y 300 caracteres")
     @Column(name = "GENERO") //nombre de la columna en la base de datos
-    @JsonProperty("GENERO")
+    @JsonProperty("genero")
     private String GENERO;  
 
     @NotBlank(message = "Sinopsis no puede estar vacía")
     @Size(min = 1, max = 300, message = "La sinopsis debe tener entre 1 y 300 caracteres")
     @Column(name = "SINOPSIS") //nombre de la columna en la base de datos   
-    @JsonProperty("SINOPSIS")
+    @JsonProperty("sinopsis")
     private String SINOPSIS;
 
      

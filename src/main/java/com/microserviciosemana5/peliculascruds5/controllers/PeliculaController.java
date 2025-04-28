@@ -1,5 +1,6 @@
 package com.microserviciosemana5.peliculascruds5.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,10 @@ import com.microserviciosemana5.peliculascruds5.model.Pelicula;
 import com.microserviciosemana5.peliculascruds5.services.PeliculaService;
 
 import jakarta.validation.Valid;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +39,10 @@ public class PeliculaController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ApiResult<>("No se encontraron películas", null, HttpStatus.NOT_FOUND.value()));
             }
+            // Generara los links HATEOAS
+            List<Link> links = List.of(
+                linkTo(methodOn(PeliculaController.class).retornaTodasLasPeliculas()).withSelfRel()
+            );
             //si la lista tiene datos retorna el mensaje de exito, la lista y el estado
             return ResponseEntity.ok(
                     new ApiResult<>("Películas encontradas", peliculas, HttpStatus.OK.value())
@@ -54,17 +63,26 @@ public class PeliculaController {
             Optional<Pelicula> pelicula = peliculaService.getPeliculaPorID(id); 
             if(pelicula.isPresent()){
                 log.info("Pelicula encontrado con id: " + id);
-                return ResponseEntity.ok(new ApiResult<>("Pelicula encontrada", pelicula.get(), HttpStatus.OK.value()));                  
+            
+                // Agregar links HATEOAS
+                List<Link> links = List.of(
+                    linkTo(methodOn(PeliculaController.class).retornaPeliculaPorID(id)).withSelfRel(),
+                    linkTo(methodOn(PeliculaController.class).eliminaPelicula(id)).withRel("delete"),
+                    linkTo(methodOn(PeliculaController.class).actualizaPelicula(id, null)).withRel("update"),
+                    linkTo(methodOn(PeliculaController.class).retornaTodasLasPeliculas()).withRel("allPeliculas")  
+                );
+            
+                return ResponseEntity.ok(new ApiResult<>("Pelicula encontrada", pelicula.get(), HttpStatus.OK.value(), links));                                         
             }
             else{  
                 log.warn("No se encontro Pelicula con id: " + id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResult<>("Pelicula no encontrada con id: " + id, null, HttpStatus.NOT_FOUND.value()));
+                        .body(new ApiResult<>("Pelicula no encontrada con id: " + id, null, HttpStatus.NOT_FOUND.value(), null));
             }
         }
         catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResult<>("Error al obtener Pelicula con id : " + id, null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+                    .body(new ApiResult<>("Error al obtener Pelicula con id : " + id, null, HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
     @PostMapping
@@ -91,7 +109,7 @@ public class PeliculaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    @PutMapping("/{id}")
+    @PutMapping("/peliculas/{id}")
     public ResponseEntity<ApiResult<List<Pelicula>>> actualizaPelicula(@PathVariable int id, @Valid @RequestBody Pelicula pelicula) {
         try {
             log.info("Put / actualizaPelicula - Se actualiza Pelicula con id: " + id);
@@ -100,7 +118,7 @@ public class PeliculaController {
             if(!buscaPelicula.isPresent()) {
                 log.warn("No se encontro Pelicula con id: " + id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResult<>("Película no encontrada", null, HttpStatus.NOT_FOUND.value()));
+                .body(new ApiResult<>("Película no encontrada", null, HttpStatus.NOT_FOUND.value(), null));
             }
 
             //si pelicula existe actualizo, rescato los datos desde la BD (getPeliculaPorID)
@@ -114,15 +132,24 @@ public class PeliculaController {
             //guardar la modificacion
             log.info("Pelicula actualizada con id: " + id);
             Pelicula peliculaActualizada = peliculaService.actualizaPelicula(actualiza, id);
+           
+             // Agregar links HATEOAS
+             List<Link> links = List.of(
+                linkTo(methodOn(PeliculaController.class).retornaPeliculaPorID(id)).withSelfRel(),
+                linkTo(methodOn(PeliculaController.class).eliminaPelicula(id)).withRel("delete"),
+                linkTo(methodOn(PeliculaController.class).actualizaPelicula(id, null)).withRel("update"),
+                linkTo(methodOn(PeliculaController.class).retornaTodasLasPeliculas()).withRel("allPeliculas")  
+            );
+            
             //retorno el resultado con apiresult
             return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResult<>("Película actualizada con éxito", List.of(peliculaActualizada), HttpStatus.OK.value()));
+                .body(new ApiResult<>("Película actualizada con éxito", List.of(peliculaActualizada), HttpStatus.OK.value(), links));
         
         } catch (Exception e) {
             // En caso de error 
             log.error("Error al actualizar Pelicula con id: " + id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ApiResult<>("Error al actualizar la película", null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+            .body(new ApiResult<>("Error al actualizar la película", null, HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
 
     }
